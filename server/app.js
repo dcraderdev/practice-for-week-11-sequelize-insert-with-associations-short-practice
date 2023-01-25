@@ -15,12 +15,23 @@ app.use(express.json());
 
 // STEP 1: Creating from an associated model (One-to-Many)
 app.post('/bands/:bandId/musicians', async (req, res, next) => {
-    // Your code here
+    const band = await Band.findByPk(req.params.bandId);
+    const { firstName, lastName } = req.body;
+    const musician = await band.createMusician({ firstName: firstName, lastName: lastName });
+    res.json({
+        message: `Created new musician for the band ${band.name}`,
+        musician: musician
+    });
 })
 
 // STEP 2: Connecting two existing records (Many-to-Many)
 app.post('/musicians/:musicianId/instruments', async (req, res, next) => {
-    // Your code here
+    const musician = await Musician.findByPk(req.params.musicianId)
+    const { instrumentIds } = req.body;
+    const instruments = await musician.addInstruments(instrumentIds);
+    res.json({
+        message: `Associated ${musician.firstName} with instruments [${instrumentIds}].`
+    })
 })
 
 
@@ -68,5 +79,5 @@ app.get('/', (req, res) => {
 });
 
 // Set port and listen for incoming requests - DO NOT MODIFY
-const port = 5000;
+const port = 5005;
 app.listen(port, () => console.log('Server is listening on port', port));
